@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" font-size="20px">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>双色球随机玩法</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: rgb(43,58,80);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    
+    li {
+      list-style: none;
+    }
+    h2 {
+      text-align: center;
+      padding: 1rem 0;
+      color: #fff;
+      border-bottom: 1px solid #eaeaea;
+    }
+    .label {
+      padding: 0.5rem 0;
+      text-align: center;
+      color: #fff;
+    }
+    .container {
+      padding: 0.2rem;
+      margin: 0 auto;
+      margin-top: 1rem;
+      border: 1px solid #fff;
+      height: 400px;
+      overflow: hidden;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+    .container .item {
+      padding: 0.2rem;
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+      line-height: 2;
+      color: #fff;
+    }
+
+    .container .item .index {
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+    
+    .container .item label {
+      margin-left: 0.1rem;
+    }
+
+    .red {
+      display: inline-block;
+      width: 13rem;
+      color: red;
+    }
+    .blue {
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+    <h2>双色球随机玩法</h2>
+    <p class="label">
+      <label for="">输入注数：</label>
+      <input type="text" id="count">
+      <button onclick="submit()">输出</button>
+      <button onclick="clearall()">清空</button>
+    </p>
+    <ul class="container" id="wrap">
+    </ul>
+  <script>
+    function random (min, max) {
+      if (max == null) {
+        max = min
+        min = 0
+      }
+      return min + Math.floor(Math.random() * (max - min + 1))
+    }
+    
+    function shuffle (ary) {
+      var len = ary.length
+      var next = Array(len)
+      for (var index = 0, rand; index < len; index++) {
+        rand = random(0, index)
+        if (index != rand) {
+          next[index] = next[rand]
+        }
+        next[rand] = ary[index]
+      }
+
+      return next
+    }
+    
+    function balls (start, end) {
+      var list = Array.from({length: end}, function (num, index) { return index + 1})
+      list = shuffle(list)
+
+      function random () {
+        var index = Math.floor(Math.random() * list.length)
+        var val = list[index]
+        list.splice(index, 1)
+        return val
+      }
+      random.clear = function () {
+        list = null
+      }
+      return random
+    }
+
+    function loop (count) {
+      var res = []
+      for (var i = 0; i < count; i++) {
+        var red = balls(1, 33)
+        var blue = balls(1, 16)
+        var cur = []
+        for (var j = 1; j <= 7; j++) {
+          if (j === 7) {
+            cur.push(blue())
+          } else {
+            cur.push(red())
+          }
+        }
+        res.push(cur)
+        red.clear()
+        blue.clear()
+      }
+      renderHtml(res)
+    }
+
+    function renderHtml (ary) {
+      var str = ""
+      ary.forEach(function(item, index) {
+        var red = item.slice(0, 6).join('、')
+        var blue = item[6]
+        str += '<li class="item">'+
+                  '<span class="index">'+(index + 1)+'.</span>'+
+                  '<div class="list"><label>红球：</label><span class="red">'+red+'</span><label>篮球：</label><span class="blue">'+blue+'</span></div>'+
+                '</li>'
+      })
+      clearall()
+      var elem = document.getElementById('wrap')
+      elem.innerHTML = str
+    }
+
+    function submit () {
+      var elem = document.getElementById('count')
+      var val = elem.value
+      
+      if (typeof +val !== 'number' || isNaN(+val)) {
+        return alert('请输入有效数值')
+      }
+      loop(+val)
+    }
+
+    function clearall () {
+      var elem = document.getElementById('wrap')
+      var first = elem.firstElementChild; 
+      while (first) { 
+        first.remove(); 
+        first = elem.firstElementChild; 
+      } 
+    }
+
+  </script>
+</body>
+</html>
